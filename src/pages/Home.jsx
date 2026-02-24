@@ -7,7 +7,7 @@ import { useCurrency } from '../context/CurrencyContext';
 // Hero Section Component (V5 - Gerçek Logo ve Premium Anlatım)
 const HeroSection = ({ scrollToMarket }) => {
     return (
-        <section className="min-h-[90vh] flex flex-col items-center justify-center relative px-6 overflow-hidden">
+        <section className="min-h-[75vh] md:min-h-[90vh] flex flex-col items-center justify-center relative px-4 md:px-6 overflow-hidden">
             {/* YENİ NESİL ANİMASYONLU ARKA PLAN (VİDEO YERİNE) */}
             <div className="absolute inset-0 z-0 overflow-hidden bg-[#020813]">
                 {/* Animated gradient mesh */}
@@ -28,7 +28,7 @@ const HeroSection = ({ scrollToMarket }) => {
                     initial={{ opacity: 0, scale: 0.95, y: 30 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ duration: 1.8, ease: "easeOut" }}
-                    className="mb-14 w-[18rem] md:w-[26rem] relative"
+                    className="mb-8 md:mb-14 w-[14rem] md:w-[26rem] relative"
                 >
                     {/* Arka plan ışık huzmesi */}
                     <div className="absolute inset-0 bg-white/10 blur-[80px] rounded-full scale-150 pointer-events-none"></div>
@@ -46,10 +46,10 @@ const HeroSection = ({ scrollToMarket }) => {
                     transition={{ delay: 1.2, duration: 1.5, ease: "easeOut" }}
                     className="text-center"
                 >
-                    <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-zinc-200 to-zinc-600 mb-6 tracking-tighter drop-shadow-xl">
+                    <h1 className="text-3xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-zinc-200 to-zinc-600 mb-4 md:mb-6 tracking-tighter drop-shadow-xl">
                         Küresel Plastik<br className="md:hidden" /> Ticaret Ağı
                     </h1>
-                    <p className="text-xl md:text-2xl text-textMuted max-w-3xl mx-auto font-light leading-relaxed tracking-wide">
+                    <p className="text-base md:text-2xl text-textMuted max-w-3xl mx-auto font-light leading-relaxed tracking-wide px-2 md:px-0">
                         Üretim fazlanızı anında <strong className="font-extrabold text-white">likit değere</strong> dönüştürün veya <strong className="font-extrabold text-white">EcoGrade Exper Güvencesiyle</strong> garantili hammadde alın.
                     </p>
                 </motion.div>
@@ -59,7 +59,7 @@ const HeroSection = ({ scrollToMarket }) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 2.2, duration: 1.5 }}
-                    className="mt-20 flex flex-col items-center"
+                    className="mt-10 md:mt-20 flex flex-col items-center"
                 >
                     <button
                         onClick={scrollToMarket}
@@ -230,14 +230,14 @@ const Home = () => {
                     {/* Header */}
                     <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-6 border-b border-white/10 pb-6">
                         <div>
-                            <h2 className="text-3xl font-black text-white mb-2 flex items-center gap-3">
+                            <h2 className="text-xl md:text-3xl font-black text-white mb-2 flex items-center gap-3">
                                 <Activity className="text-primary" /> Endüstriyel İşlem Tahtası
                             </h2>
-                            <p className="text-textMuted">Tüm onaylı üretim fazlaları ve off-grade stoklar.</p>
+                            <p className="text-sm md:text-base text-textMuted">Tüm onaylı üretim fazlaları ve off-grade stoklar.</p>
                         </div>
-                        <div className="flex gap-4">
-                            <Link to="/sat" className="btn-secondary h-11"><Activity size={18} /> Reçine İlanı Ekle</Link>
-                            <Link to="/al" className="btn-primary h-11"><PackageSearch size={18} /> Hızlı Satın Al</Link>
+                        <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full md:w-auto">
+                            <Link to="/sat" className="btn-secondary h-11 text-sm md:text-base"><Activity size={18} /> Reçine İlanı Ekle</Link>
+                            <Link to="/al" className="btn-primary h-11 text-sm md:text-base"><PackageSearch size={18} /> Hızlı Satın Al</Link>
                         </div>
                     </div>
 
