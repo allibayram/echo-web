@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { PackageSearch, BadgeCheck, ShieldCheck, ArrowRightLeft, TrendingUp, Sparkles, UserCircle, LogOut, Globe, ChevronDown, Menu, X } from 'lucide-react';
+import { PackageSearch, BadgeCheck, ShieldCheck, ArrowRightLeft, TrendingUp, Sparkles, UserCircle, LogOut, Globe, ChevronDown, Menu, X, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import Home from './pages/Home';
@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import CompanyProfile from './pages/CompanyProfile';
 import LotDetail from './pages/LotDetail';
+import Messages from './pages/Messages';
 import { useAuth } from './context/AuthContext';
 
 // Market Ticker Component
@@ -68,7 +69,7 @@ const AnimatedRoutes = () => {
           </motion.div>
         } />
         <Route path="/agent" element={
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }} transition={{ duration: 0.6 }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
             <AgentDashboard />
           </motion.div>
         } />
@@ -91,6 +92,11 @@ const AnimatedRoutes = () => {
         <Route path="/lot/:id" element={
           <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.6 }}>
             <LotDetail />
+          </motion.div>
+        } />
+        <Route path="/mesajlarim" element={
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.6 }}>
+            <Messages />
           </motion.div>
         } />
       </Routes>
@@ -141,7 +147,10 @@ const Footer = () => {
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from './context/CurrencyContext';
 
-function App() {
+// Layout wrapper that hides header/footer on /agent
+const AppLayout = ({ children }) => {
+  const location = useLocation();
+  const isAgentPage = location.pathname === '/agent';
   const { user, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const { currency, setCurrency } = useCurrency();
@@ -155,110 +164,114 @@ function App() {
     setCurrency(currency === 'USD' ? 'EUR' : 'USD');
   };
 
+  if (isAgentPage) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col relative w-full overflow-x-hidden font-sans">
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 blur-[120px] rounded-full pointer-events-none z-0"></div>
+      <Ticker />
+      <header className="sticky top-0 z-50 glass-panel mx-4 mt-4 px-6 py-4 flex justify-between items-center h-20">
+        <Link to="/" className="text-2xl font-extrabold tracking-tight text-textMain flex items-center gap-2">
+          EcoGrade <span className="text-primary flex items-center"><Sparkles size={20} className="mr-1" />Broker</span>
+        </Link>
+        <div className="hidden md:flex gap-6 items-center text-sm font-semibold">
+          <div className="flex items-center gap-3 border-r border-white/10 pr-6 mr-2">
+            <div onClick={toggleLanguage} className="flex items-center gap-1 cursor-pointer hover:text-white text-textMuted transition-colors group relative">
+              <Globe size={16} className="text-primary" />
+              <span className="uppercase">{i18n.language}</span>
+              <ChevronDown size={14} className="opacity-50" />
+            </div>
+            <div onClick={toggleCurrency} className="flex items-center gap-1 cursor-pointer hover:text-white text-textMuted transition-colors group relative">
+              <span>{currency}</span>
+              <ChevronDown size={14} className="opacity-50" />
+            </div>
+          </div>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><BadgeCheck size={18} color="#10B981" /> {t('app.lab')}</span>
+          <span className="flex items-center gap-2 text-textMuted"><ShieldCheck size={18} className="text-accent" /> {t('app.escrow')}</span>
+          {user ? (
+            <div className="flex items-center gap-4 ml-4 border-l border-white/10 pl-4">
+              <span className="flex items-center gap-2 text-white font-bold">
+                <UserCircle size={18} className="text-primary" /> {user.name}
+                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded ml-1">{user.role}</span>
+              </span>
+              {user.role === 'AGENT' && (
+                <Link to="/agent" className="hidden lg:flex items-center gap-2 text-primary hover:text-primary/80 transition-colors bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-xl border border-primary/20">
+                  <ShieldCheck size={16} /> Panel
+                </Link>
+              )}
+              <Link to="/mesajlarim" className="hidden lg:flex items-center gap-2 text-textMuted hover:text-white transition-colors">
+                <MessageCircle size={16} /> Mesajlarım
+              </Link>
+              <button onClick={() => { logout(); window.location.href = '/login'; }} className="flex items-center gap-2 text-textMuted hover:text-red-400 transition-colors ml-2">
+                <LogOut size={16} /> {t('app.logout')}
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 ml-4 border-l border-white/10 pl-4">
+              <Link to="/login" className="text-textMuted hover:text-white transition-colors">{t('app.login')}</Link>
+              <Link to="/register" className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-background px-4 py-2 rounded-xl transition-colors">
+                {t('app.register')}
+              </Link>
+            </div>
+          )}
+        </div>
+        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white p-2">
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </header>
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 top-20 z-40 glass-panel mx-4 mt-2 p-6 rounded-xl border border-white/10 flex flex-col gap-4 text-sm font-semibold overflow-y-auto max-h-[calc(100vh-6rem)]">
+          <div className="flex items-center gap-4 pb-4 border-b border-white/10">
+            <div onClick={() => { i18n.changeLanguage(i18n.language === 'tr' ? 'en' : 'tr'); }} className="flex items-center gap-1 cursor-pointer text-textMuted hover:text-white">
+              <Globe size={16} className="text-primary" /> <span className="uppercase">{i18n.language}</span>
+            </div>
+            <div onClick={() => { setCurrency(currency === 'USD' ? 'EUR' : 'USD'); }} className="flex items-center gap-1 cursor-pointer text-textMuted hover:text-white">
+              {currency}
+            </div>
+          </div>
+          {user ? (
+            <>
+              <div className="flex items-center gap-2 text-white font-bold">
+                <UserCircle size={18} className="text-primary" /> {user.name}
+                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded ml-1">{user.role}</span>
+              </div>
+              {user.role === 'AGENT' && (
+                <Link to="/agent" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 text-primary bg-primary/10 px-4 py-3 rounded-lg">
+                  <ShieldCheck size={16} /> Agent Panel
+                </Link>
+              )}
+              <Link to="/sat" onClick={() => setMobileMenuOpen(false)} className="text-textMuted hover:text-white py-2">Sat</Link>
+              <Link to="/al" onClick={() => setMobileMenuOpen(false)} className="text-textMuted hover:text-white py-2">Al</Link>
+              <Link to="/mesajlarim" onClick={() => setMobileMenuOpen(false)} className="text-textMuted hover:text-white py-2 flex items-center gap-2"><MessageCircle size={16} /> Mesajlarım</Link>
+              <button onClick={() => { logout(); setMobileMenuOpen(false); window.location.href = '/login'; }} className="flex items-center gap-2 text-red-400 mt-4 pt-4 border-t border-white/10">
+                <LogOut size={16} /> {t('app.logout')}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="text-textMuted hover:text-white py-2">{t('app.login')}</Link>
+              <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="bg-primary text-background px-4 py-3 rounded-lg text-center font-bold">{t('app.register')}</Link>
+            </>
+          )}
+        </div>
+      )}
+      <main className="flex-1 relative z-10 w-full mb-12">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+function App() {
   return (
     <Router>
-      <div className="min-h-screen flex flex-col relative w-full overflow-x-hidden font-sans">
-
-        {/* Background glow effects */}
-        <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
-        <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 blur-[120px] rounded-full pointer-events-none z-0"></div>
-
-        <Ticker />
-
-        <header className="sticky top-0 z-50 glass-panel mx-4 mt-4 px-6 py-4 flex justify-between items-center h-20">
-          <Link to="/" className="text-2xl font-extrabold tracking-tight text-textMain flex items-center gap-2">
-            EcoGrade <span className="text-primary flex items-center"><Sparkles size={20} className="mr-1" />Broker</span>
-          </Link>
-          <div className="hidden md:flex gap-6 items-center text-sm font-semibold">
-            <div className="flex items-center gap-3 border-r border-white/10 pr-6 mr-2">
-              <div onClick={toggleLanguage} className="flex items-center gap-1 cursor-pointer hover:text-white text-textMuted transition-colors group relative">
-                <Globe size={16} className="text-primary" />
-                <span className="uppercase">{i18n.language}</span>
-                <ChevronDown size={14} className="opacity-50" />
-              </div>
-              <div onClick={toggleCurrency} className="flex items-center gap-1 cursor-pointer hover:text-white text-textMuted transition-colors group relative">
-                <span>{currency}</span>
-                <ChevronDown size={14} className="opacity-50" />
-              </div>
-            </div>
-
-            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><BadgeCheck size={18} color="#10B981" /> {t('app.lab')}</span>
-            <span className="flex items-center gap-2 text-textMuted"><ShieldCheck size={18} className="text-accent" /> {t('app.escrow')}</span>
-
-            {user ? (
-              <div className="flex items-center gap-4 ml-4 border-l border-white/10 pl-4">
-                <span className="flex items-center gap-2 text-white font-bold">
-                  <UserCircle size={18} className="text-primary" /> {user.name}
-                  <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded ml-1">{user.role}</span>
-                </span>
-                {user.role === 'AGENT' && (
-                  <Link to="/agent" className="hidden lg:flex items-center gap-2 text-primary hover:text-primary/80 transition-colors bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-xl border border-primary/20">
-                    <ShieldCheck size={16} /> Panel
-                  </Link>
-                )}
-                <button onClick={() => { logout(); window.location.href = '/login'; }} className="flex items-center gap-2 text-textMuted hover:text-red-400 transition-colors ml-2">
-                  <LogOut size={16} /> {t('app.logout')}
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3 ml-4 border-l border-white/10 pl-4">
-                <Link to="/login" className="text-textMuted hover:text-white transition-colors">{t('app.login')}</Link>
-                <Link to="/register" className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-background px-4 py-2 rounded-xl transition-colors">
-                  {t('app.register')}
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Hamburger */}
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white p-2">
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </header>
-
-        {/* Mobile Menu Overlay */}
-        {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 top-20 z-40 glass-panel mx-4 mt-2 p-6 rounded-xl border border-white/10 flex flex-col gap-4 text-sm font-semibold overflow-y-auto max-h-[calc(100vh-6rem)]">
-            <div className="flex items-center gap-4 pb-4 border-b border-white/10">
-              <div onClick={() => { i18n.changeLanguage(i18n.language === 'tr' ? 'en' : 'tr'); }} className="flex items-center gap-1 cursor-pointer text-textMuted hover:text-white">
-                <Globe size={16} className="text-primary" /> <span className="uppercase">{i18n.language}</span>
-              </div>
-              <div onClick={() => { setCurrency(currency === 'USD' ? 'EUR' : 'USD'); }} className="flex items-center gap-1 cursor-pointer text-textMuted hover:text-white">
-                {currency}
-              </div>
-            </div>
-            {user ? (
-              <>
-                <div className="flex items-center gap-2 text-white font-bold">
-                  <UserCircle size={18} className="text-primary" /> {user.name}
-                  <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded ml-1">{user.role}</span>
-                </div>
-                {user.role === 'AGENT' && (
-                  <Link to="/agent" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 text-primary bg-primary/10 px-4 py-3 rounded-lg">
-                    <ShieldCheck size={16} /> Agent Panel
-                  </Link>
-                )}
-                <Link to="/sat" onClick={() => setMobileMenuOpen(false)} className="text-textMuted hover:text-white py-2">Sat</Link>
-                <Link to="/al" onClick={() => setMobileMenuOpen(false)} className="text-textMuted hover:text-white py-2">Al</Link>
-                <button onClick={() => { logout(); setMobileMenuOpen(false); window.location.href = '/login'; }} className="flex items-center gap-2 text-red-400 mt-4 pt-4 border-t border-white/10">
-                  <LogOut size={16} /> {t('app.logout')}
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="text-textMuted hover:text-white py-2">{t('app.login')}</Link>
-                <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="bg-primary text-background px-4 py-3 rounded-lg text-center font-bold">{t('app.register')}</Link>
-              </>
-            )}
-          </div>
-        )}
-
-        <main className="flex-1 relative z-10 w-full mb-12">
-          <AnimatedRoutes />
-        </main>
-
-        <Footer />
-      </div>
+      <AppLayout>
+        <AnimatedRoutes />
+      </AppLayout>
     </Router>
   );
 }

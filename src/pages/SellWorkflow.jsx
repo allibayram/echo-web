@@ -4,15 +4,22 @@ import { ArrowLeft, CheckCircle, Activity, Box, Search, ShieldCheck, FileUp, Che
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Country, State, City } from 'country-state-city';
+import { useAuth } from '../context/AuthContext';
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://ecograde-broker1.vercel.app';
 
 const SellWorkflow = () => {
     const navigate = useNavigate();
+    const { user, token } = useAuth();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [userPrice, setUserPrice] = useState("");
     const [photoName, setPhotoName] = useState("");
     const [tdsFile, setTdsFile] = useState(null);
     const [isParsingTds, setIsParsingTds] = useState(false);
+    const [submitError, setSubmitError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [aiPrice, setAiPrice] = useState(null);
     const [formData, setFormData] = useState({
         material_type: 'PP',
         material_form: 'Granül',
@@ -58,24 +65,44 @@ const SellWorkflow = () => {
 
     const handleGoToPricingStep = async (e) => {
         e.preventDefault();
+        setSubmitError("");
 
         // VALIDATION CHECK
         if (!formData.material_type || !formData.material_form || !formData.color || !formData.declared_mfi || !formData.declared_density || !formData.quantity_tons || !selectedCity) {
-            alert('Lütfen fiyata geçmeden önce formdaki tüm zorunlu alanları (Lokasyon dahil) doldurduğunuzdan emin olun.');
+            setSubmitError('Lütfen fiyata geçmeden önce formdaki tüm zorunlu alanları (Lokasyon dahil) doldurduğunuzdan emin olun.');
+            return;
+        }
+
+        if (!token) {
+            setSubmitError('Ürün yüklemek için giriş yapmanız gerekiyor.');
+            navigate('/login');
             return;
         }
 
         setLoading(true);
 
-        // Yükleme (AI Pazar Taraması) Animasyonu Simülasyonu
+        // Kısa piyasa tarama animasyonu, sonra fiyat adımına geç
         setTimeout(() => {
             setLoading(false);
             setStep(2);
-        }, 1500); // Sadece hızlı bir pazar tarama hissi
+        }, 1500);
     };
 
     return (
         <div className="w-full max-w-7xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12">
+            {/* Toast Notifications */}
+            {submitError && (
+                <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-red-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-lg animate-bounce-in">
+                    <span className="text-sm font-semibold">{submitError}</span>
+                    <button onClick={() => setSubmitError("")} className="text-white/70 hover:text-white ml-2 text-lg font-bold">&times;</button>
+                </div>
+            )}
+            {successMessage && (
+                <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] bg-emerald-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-lg">
+                    <CheckCircle size={20} />
+                    <span className="text-sm font-semibold">{successMessage}</span>
+                </div>
+            )}
             <div className="w-full lg:w-2/3">
                 <button onClick={() => navigate('/')} className="flex items-center gap-2 text-textMuted hover:text-white transition-colors mb-8">
                     <ArrowLeft size={20} /> Ana Ekrana Dön
@@ -498,23 +525,32 @@ const SellWorkflow = () => {
                                         </button>
                                         <button onClick={async () => {
                                             if (!userPrice || parseFloat(userPrice) <= 0) {
-                                                alert("Devam etmek için lütfen geçerli bir satış fiyatı girin.");
+                                                setSubmitError("Devam etmek için lütfen geçerli bir satış fiyatı girin.");
+                                                return;
+                                            }
+                                            if (!token) {
+                                                setSubmitError('Ürün yüklemek için giriş yapmanız gerekiyor.');
+                                                navigate('/login');
                                                 return;
                                             }
                                             try {
-                                                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                                                const API_URL = import.meta.env.VITE_API_URL || 'https://ecograde-broker1.vercel.app';
                                                 await axios.post(`${API_URL}/offers/`, {
                                                     material_type: formData.material_type,
                                                     material_form: formData.material_form,
                                                     declared_mfi: parseFloat(formData.declared_mfi),
                                                     declared_density: parseFloat(formData.declared_density),
                                                     quantity_tons: parseFloat(formData.quantity_tons),
-                                                    ai_estimated_price_usd: parseFloat(userPrice) // Geçici olarak backend bu alanı alıyor. (Sonradan DB kolon ismi değiştirilebilir)
+                                                    ai_estimated_price_usd: parseFloat(userPrice)
+                                                }, {
+                                                    headers: {
+                                                        'Authorization': `Bearer ${token}`
+                                                    }
                                                 });
-                                                alert("İlanınız başarıyla işleme alındı!\n\nDurumu panosundan takip edebilirsiniz.");
-                                                navigate('/');
+                                                setSuccessMessage("İlanınız başarıyla işleme alındı! Durumu panosundan takip edebilirsiniz.");
+                                                setTimeout(() => navigate('/'), 2000);
                                             } catch (err) {
-                                                alert("İlan oluşturulurken bir hata oluştu.");
+                                                setSubmitError("İlan oluşturulurken bir hata oluştu: " + (err.response?.data?.detail || err.message));
                                             }
                                         }} className="btn-primary w-full col-span-2">
                                             Fiyatı Onayla ve Gönder

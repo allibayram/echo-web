@@ -1,16 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, ShieldCheck, FileText, CheckCircle2, Factory, Bot } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://ecograde-broker1.vercel.app';
 
 const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı Satıcı" }) => {
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [conversationId, setConversationId] = useState(null);
     const messagesEndRef = useRef(null);
+    const { user, token } = useAuth();
 
     useEffect(() => {
         if (isOpen && messages.length === 0) {
-            // Initial greeting
+            // Initial system greeting
             setMessages([
                 {
                     id: 1,
@@ -32,7 +37,7 @@ const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı S
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isTyping]);
 
-    const handleSend = (e) => {
+    const handleSend = async (e) => {
         e.preventDefault();
         if (!inputValue.trim()) return;
 
@@ -44,18 +49,42 @@ const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı S
         };
 
         setMessages(prev => [...prev, newMsg]);
+        const msgText = inputValue;
         setInputValue('');
         setIsTyping(true);
 
-        // Mock response
+        // Try to send via API if authenticated
+        if (token) {
+            try {
+                const res = await fetch(`${API_URL}/messages/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        conversation_id: conversationId,
+                        receiver_id: lotData?.seller_id || 1,
+                        lot_id: lotData?.id || null,
+                        text: msgText
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.conversation_id) setConversationId(data.conversation_id);
+                }
+            } catch (err) {
+                console.log('Message API unavailable, using local mode');
+            }
+        }
+
+        // Auto-reply (demo mode)
         setTimeout(() => {
             setIsTyping(false);
-
-            // Check if it's a price negotiation
-            const textL = newMsg.text.toLowerCase();
+            const textL = msgText.toLowerCase();
             let responseText = 'Mesajınız alındı. Temsilcilerimiz en kısa sürede dönüş yapacaktır.';
 
-            if (textL.includes('fiyat') || /\\d+/.test(textL)) {
+            if (textL.includes('fiyat') || /\d+/.test(textL)) {
                 responseText = 'Teklifinizi değerlendiriyoruz. Belirttiğiniz lot için limitimiz sistemde tanımlıdır. İsterseniz EcoGrade Escrow üzerinden resmi teklif geçebilirsiniz.';
             } else if (textL.includes('rapor') || textL.includes('test')) {
                 responseText = 'Bu lotun EcoGrade laboratuvar sonuçları (MFI, Yoğunluk) ekteki TDS dosyasında günceldir.';

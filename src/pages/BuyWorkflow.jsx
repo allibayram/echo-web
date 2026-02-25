@@ -28,11 +28,11 @@ const BuyWorkflow = () => {
         setTimeout(async () => {
             try {
                 if (showAll) {
-                    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                    const API_URL = import.meta.env.VITE_API_URL || 'https://ecograde-broker1.vercel.app';
                     const res = await axios.get(`${API_URL}/products/`, { timeout: 3000 });
                     setMatches(res.data);
                 } else {
-                    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                    const API_URL = import.meta.env.VITE_API_URL || 'https://ecograde-broker1.vercel.app';
                     const matchRes = await axios.post(`${API_URL}/products/match`, {
                         material_type: formData.material_type,
                         min_mfi: parseFloat(formData.min_mfi),
@@ -61,7 +61,7 @@ const BuyWorkflow = () => {
 
     const handleCheckout = async () => {
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            const API_URL = import.meta.env.VITE_API_URL || 'https://ecograde-broker1.vercel.app';
             await axios.post(`${API_URL}/checkout/`, {
                 lot_id: checkoutLot.id,
                 quantity_tons: checkoutLot.quantity_tons,

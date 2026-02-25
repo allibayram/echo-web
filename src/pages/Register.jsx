@@ -18,7 +18,7 @@ const Register = () => {
     });
 
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { register } = useAuth();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,7 +29,7 @@ const Register = () => {
         setStep(2);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setPasswordError('');
 
@@ -46,20 +46,19 @@ const Register = () => {
 
         setIsLoading(true);
 
-        // Mock API call for KYC submission
-        setTimeout(() => {
-            const mockUser = {
-                id: 'usr_' + Math.floor(Math.random() * 100000),
-                email: formData.email,
-                name: formData.contactName,
+        try {
+            await register({
                 companyName: formData.companyName,
-                role: formData.role,
-                verifiedStatus: 'PENDING'
-            };
-            login(mockUser);
+                email: formData.email,
+                password: formData.password,
+                role: formData.role
+            });
             setIsLoading(false);
             setStep(3); // Success step
-        }, 1500);
+        } catch (err) {
+            setPasswordError(err.message || 'Kayıt sırasında bir hata oluştu.');
+            setIsLoading(false);
+        }
     };
 
     return (

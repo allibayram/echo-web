@@ -109,7 +109,8 @@ const Home = () => {
         // Fetch real data from the backend
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:8000/products/');
+                const API_URL = import.meta.env.VITE_API_URL || 'https://ecograde-broker1.vercel.app';
+                const response = await axios.get(`${API_URL}/products/`);
                 setApiProducts(response.data);
                 setLoading(false);
             } catch (error) {

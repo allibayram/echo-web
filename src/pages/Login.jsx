@@ -23,42 +23,27 @@ const Login = () => {
         return null;
     }
 
-    // Kayıtlı kullanıcı veritabanı (demo amaçlı)
-    const VALID_USERS = [
-        { email: 'agent@ecograde.com', password: '123456', id: 'usr_8x992', name: 'AGENT MANAGER', role: 'AGENT', companyName: 'EcoGrade Operations', verifiedStatus: 'GOLD' },
-        { email: 'seller@ecograde.com', password: '123456', id: 'usr_4k821', name: 'BOSPHORUS PLASTICS', role: 'SELLER', companyName: 'Bosphorus Plastics A.Ş.', verifiedStatus: 'GOLD' },
-        { email: 'buyer@ecograde.com', password: '123456', id: 'usr_7m443', name: 'GLOBAL POLYMERS', role: 'BUYER', companyName: 'Global Polymers Ltd.', verifiedStatus: 'SILVER' },
-        { email: 'demo@ecograde.com', password: 'demo123', id: 'usr_demo1', name: 'DEMO USER', role: 'SELLER', companyName: 'Demo A.Ş.', verifiedStatus: 'PENDING' },
-    ];
+    // Kayıtlı kullanıcı kontrolü gerçek API'den yapılıyor
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
 
-        setTimeout(() => {
-            const foundUser = VALID_USERS.find(u => u.email === email.toLowerCase() && u.password === password);
-            if (foundUser) {
-                login({
-                    id: foundUser.id,
-                    email: foundUser.email,
-                    name: foundUser.name,
-                    role: foundUser.role,
-                    companyName: foundUser.companyName,
-                    verifiedStatus: foundUser.verifiedStatus
-                });
-                setIsLoading(false);
-                if (foundUser.role === 'AGENT') {
-                    navigate('/agent');
-                } else {
-                    navigate('/');
-                }
+        try {
+            const userData = await login(email, password);
+            setIsLoading(false);
+            if (userData.role === 'AGENT' || userData.role === 'admin') {
+                navigate('/agent');
             } else {
-                setError('Geçersiz e-posta veya şifre kombinasyonu. Lütfen kayıtlı bilgilerinizle tekrar deneyin.');
-                setIsLoading(false);
+                navigate('/');
             }
-        }, 1200);
+        } catch (err) {
+            setError(err.message || 'Geçersiz e-posta veya şifre kombinasyonu.');
+            setIsLoading(false);
+        }
     };
+
 
     return (
         <div className="min-h-[85vh] flex items-center justify-center relative px-4">

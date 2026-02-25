@@ -1,4 +1,30 @@
 {
+    "buildCommand": "VITE_API_URL=https://ecograde-broker1.vercel.app npm run build",
+    "outputDirectory": "dist",
+    "headers": [
+        {
+            "source": "/index.html",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "no-cache, no-store, must-revalidate"
+                },
+                {
+                    "key": "Pragma",
+                    "value": "no-cache"
+                }
+            ]
+        },
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "no-cache, must-revalidate"
+                }
+            ]
+        }
+    ],
     "rewrites": [
         {
             "source": "/(.*)",
