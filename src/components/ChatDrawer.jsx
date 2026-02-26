@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, ShieldCheck, FileText, CheckCircle2, Factory, Bot } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://ecograde-broker1.vercel.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://ecograde-broker1.onrender.com';
 
-const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı Satıcı" }) => {
+const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade OnaylÄ± SatÄ±cÄ±" }) => {
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -20,13 +20,13 @@ const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı S
                 {
                     id: 1,
                     sender: 'system',
-                    text: 'Güvenli Pazar Odasına (Escrow Room) bağlandınız. Bu odadaki tüm yazışmalar EcoGrade güvencesi altındadır ve yasal delil niteliği taşır.',
+                    text: 'GÃ¼venli Pazar OdasÄ±na (Escrow Room) baÄŸlandÄ±nÄ±z. Bu odadaki tÃ¼m yazÄ±ÅŸmalar EcoGrade gÃ¼vencesi altÄ±ndadÄ±r ve yasal delil niteliÄŸi taÅŸÄ±r.',
                     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 },
                 {
                     id: 2,
                     sender: 'seller',
-                    text: `Merhaba, #${lotData?.id || 'TX-8921'} referanslı ${lotData?.polimer || 'hammadde'} ilanımız için nasıl yardımcı olabilirim?`,
+                    text: `Merhaba, #${lotData?.id || 'TX-8921'} referanslÄ± ${lotData?.polimer || 'hammadde'} ilanÄ±mÄ±z iÃ§in nasÄ±l yardÄ±mcÄ± olabilirim?`,
                     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 }
             ]);
@@ -82,12 +82,12 @@ const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı S
         setTimeout(() => {
             setIsTyping(false);
             const textL = msgText.toLowerCase();
-            let responseText = 'Mesajınız alındı. Temsilcilerimiz en kısa sürede dönüş yapacaktır.';
+            let responseText = 'MesajÄ±nÄ±z alÄ±ndÄ±. Temsilcilerimiz en kÄ±sa sÃ¼rede dÃ¶nÃ¼ÅŸ yapacaktÄ±r.';
 
             if (textL.includes('fiyat') || /\d+/.test(textL)) {
-                responseText = 'Teklifinizi değerlendiriyoruz. Belirttiğiniz lot için limitimiz sistemde tanımlıdır. İsterseniz EcoGrade Escrow üzerinden resmi teklif geçebilirsiniz.';
+                responseText = 'Teklifinizi deÄŸerlendiriyoruz. BelirttiÄŸiniz lot iÃ§in limitimiz sistemde tanÄ±mlÄ±dÄ±r. Ä°sterseniz EcoGrade Escrow Ã¼zerinden resmi teklif geÃ§ebilirsiniz.';
             } else if (textL.includes('rapor') || textL.includes('test')) {
-                responseText = 'Bu lotun EcoGrade laboratuvar sonuçları (MFI, Yoğunluk) ekteki TDS dosyasında günceldir.';
+                responseText = 'Bu lotun EcoGrade laboratuvar sonuÃ§larÄ± (MFI, YoÄŸunluk) ekteki TDS dosyasÄ±nda gÃ¼nceldir.';
             }
 
             setMessages(prev => [...prev, {
@@ -130,7 +130,7 @@ const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı S
                                 <div>
                                     <h3 className="text-white font-bold text-sm leading-tight">{sellerName}</h3>
                                     <div className="flex items-center gap-1 text-xs text-emerald-400 mt-0.5">
-                                        <Bot size={12} /> Çevrimiçi
+                                        <Bot size={12} /> Ã‡evrimiÃ§i
                                     </div>
                                 </div>
                             </div>
@@ -143,7 +143,7 @@ const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı S
                         {lotData && (
                             <div className="bg-primary/5 border-b border-primary/10 p-3 shrink-0 flex items-center justify-between">
                                 <span className="text-xs font-mono text-textMuted">Ref: #{lotData.id}</span>
-                                <span className="text-xs font-bold text-white">{lotData.polimer} • {lotData.qty} Ton • ${lotData.price}/t</span>
+                                <span className="text-xs font-bold text-white">{lotData.polimer} â€¢ {lotData.qty} Ton â€¢ ${lotData.price}/t</span>
                             </div>
                         )}
 
@@ -189,16 +189,16 @@ const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı S
 
                         {/* Input Area */}
                         <div className="p-4 border-t border-white/10 bg-[#0F172A] shrink-0">
-                            {/* Hızlı Teklif Butonları */}
+                            {/* HÄ±zlÄ± Teklif ButonlarÄ± */}
                             <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar pb-1">
                                 <button onClick={() => setInputValue(`$${Math.max(0, (lotData?.price || 1000) - 50)} teklif veriyorum.`)} className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-lg text-xs text-primary font-bold whitespace-nowrap transition-colors">
-                                    💰 Hızlı Teklif (-$50)
+                                    ğŸ’° HÄ±zlÄ± Teklif (-$50)
                                 </button>
-                                <button onClick={() => setInputValue("Orijinallik sertifikası ve güncel analiz raporu talep ediyorum.")} className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-white whitespace-nowrap transition-colors">
-                                    📄 Rapor İste
+                                <button onClick={() => setInputValue("Orijinallik sertifikasÄ± ve gÃ¼ncel analiz raporu talep ediyorum.")} className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-white whitespace-nowrap transition-colors">
+                                    ğŸ“„ Rapor Ä°ste
                                 </button>
-                                <button onClick={() => setInputValue("FOB teslim şartlarında son fiyatınız nedir?")} className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-white whitespace-nowrap transition-colors">
-                                    🚢 Lojistik Sorgusu
+                                <button onClick={() => setInputValue("FOB teslim ÅŸartlarÄ±nda son fiyatÄ±nÄ±z nedir?")} className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-white whitespace-nowrap transition-colors">
+                                    ğŸš¢ Lojistik Sorgusu
                                 </button>
                             </div>
 
@@ -210,7 +210,7 @@ const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı S
                                     type="text"
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
-                                    placeholder="Mesajınızı veya resmi teklifinizi yazın..."
+                                    placeholder="MesajÄ±nÄ±zÄ± veya resmi teklifinizi yazÄ±n..."
                                     className="flex-1 bg-white/5 border border-white/10 rounded-full pl-4 pr-12 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
                                 />
                                 <button
@@ -235,3 +235,4 @@ const ChatDrawer = ({ isOpen, onClose, lotData, sellerName = "EcoGrade Onaylı S
 };
 
 export default ChatDrawer;
+
